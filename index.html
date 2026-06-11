@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Joe Xiter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #000000; color: #ffffff; font-family: -apple-system, sans-serif; }
+        
+        .siri-glow {
+            position: absolute; inset: -4px;
+            background: linear-gradient(135deg, #007AFF, #6C2BD9, #FF2D55);
+            border-radius: 40px;
+            filter: blur(12px);
+            opacity: 0.8;
+            animation: rotate 6s linear infinite;
+        }
+        @keyframes rotate { 0% { filter: hue-rotate(0deg) blur(12px); } 100% { filter: hue-rotate(360deg) blur(12px); } }
+        
+        .glass-card { background: rgba(28, 28, 30, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .star { cursor: pointer; color: #4b5563; transition: color 0.2s; }
+        .star.active { color: #fbbf24; }
+        
+        #popup-overlay {
+            visibility: hidden;
+            opacity: 0;
+            transition: visibility 0s, opacity 0.3s ease;
+        }
+        #popup-content {
+            transform: scale(0.9);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        #popup-overlay.active {
+            visibility: visible;
+            opacity: 1;
+        }
+        #popup-overlay.active #popup-content {
+            transform: scale(1);
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-6">
+
+    <div class="w-full max-w-sm flex flex-col items-center">
+        <div class="relative mb-6">
+            <div class="siri-glow"></div>
+            <div class="w-32 h-32 rounded-[37px] overflow-hidden bg-black relative border border-white/10">
+                <img src="https://raw.githubusercontent.com/MyZann/joexit/refs/heads/main/IMG_8983.jpeg" alt="Joe Xiter" class="w-full h-full object-cover">
+            </div>
+        </div>
+
+        <h1 class="text-3xl font-bold tracking-tight mb-8">Joe Xiter</h1>
+
+        <div class="w-full space-y-4 mb-8">
+            <a href="https://whatsapp.com/channel/0029Vb8ZVPT30LKQE0qIRi3z" class="glass-card block w-full py-5 px-6 rounded-3xl text-center font-medium hover:bg-white hover:text-black transition-colors">
+                WhatsApp Channel
+            </a>
+            <a id="admin-link" href="https://wa.me/6285860881269" class="glass-card block w-full py-5 px-6 rounded-3xl text-center font-medium hover:bg-white hover:text-black transition-colors">
+                Kontak Admin
+            </a>
+        </div>
+
+        <div class="glass-card w-full py-4 px-6 rounded-3xl text-center">
+            <p class="text-xs uppercase tracking-widest text-gray-400 mb-2">Beri Rating</p>
+            <div id="star-container" class="flex justify-center gap-2 text-2xl">
+                <span class="star" onclick="setRating(1)">★</span>
+                <span class="star" onclick="setRating(2)">★</span>
+                <span class="star" onclick="setRating(3)">★</span>
+                <span class="star" onclick="setRating(4)">★</span>
+                <span class="star" onclick="setRating(5)">★</span>
+            </div>
+        </div>
+
+        <p class="mt-16 text-gray-500 text-xs uppercase tracking-widest">© 2026 Copyright Joexiter</p>
+    </div>
+
+    <div id="popup-overlay" class="fixed inset-0 flex items-center justify-center bg-black/80 p-6 z-50">
+        <div id="popup-content" class="glass-card p-8 rounded-3xl text-center max-w-xs shadow-2xl">
+            <h2 class="text-xl font-bold mb-2">Terima Kasih!</h2>
+            <p class="text-sm text-gray-400 mb-6">Gunakan kode voucher ini untuk diskon 15%</p>
+            <div class="bg-white/10 py-3 rounded-xl font-mono text-lg font-bold mb-6 tracking-widest">JOEVCHR001XT</div>
+            <button onclick="closePopup()" class="w-full py-3 bg-white text-black rounded-xl font-bold">Tutup</button>
+        </div>
+    </div>
+
+    <script>
+        const stars = document.querySelectorAll('.star');
+        const overlay = document.getElementById('popup-overlay');
+        const adminLink = document.getElementById('admin-link');
+        const voucher = "JOEVCHR001XT";
+
+        function setRating(rating) {
+            localStorage.setItem('joeXiterRating', rating);
+            updateStars(rating);
+            if (rating == 5) {
+                overlay.classList.add('active');
+                adminLink.href = "https://wa.me/6285860881269/?text=Saya telah me rating 5 pada anda (JOEVCHR001XT)";
+            } else {
+                adminLink.href = "https://wa.me/6285860881269";
+            }
+        }
+
+        function closePopup() {
+            overlay.classList.remove('active');
+        }
+
+        function updateStars(rating) {
+            stars.forEach((star, index) => star.classList.toggle('active', index < rating));
+        }
+
+        window.onload = () => {
+            const savedRating = localStorage.getItem('joeXiterRating');
+            if (savedRating) {
+                updateStars(savedRating);
+                if (savedRating == 5) {
+                    adminLink.href = "https://wa.me/6285860881269/?text=Saya telah me rating 5 pada anda (JOEVCHR001XT)";
+                }
+            }
+        };
+    </script>
+</body>
+</html>
