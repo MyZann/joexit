@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Joexit - Premium Key Subscription</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #0a0a0c; color: #f4f4f5; }
+        .bg-glow { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: radial-gradient(ellipse at top, rgba(139, 92, 246, 0.2), #0a0a0c, #0a0a0c); z-index: -1; pointer-events: none; }
+        .glass-panel { background: rgba(24, 24, 27, 0.4); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .neon-border { box-shadow: 0 0 15px rgba(139, 92, 246, 0.5), inset 0 0 10px rgba(139, 92, 246, 0.2); border-color: rgba(139, 92, 246, 0.8) !important; }
+        @media (display-mode: fullscreen), (display-mode: minimal-ui) {
+            .secure-key { filter: blur(10px); user-select: none; pointer-events: none; }
+        }
+        @media print { .secure-key { display: none !important; } }
+        .secure-key::selection { background: transparent; color: transparent; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        #view-auth, #view-home, #view-detail, #view-payment, #view-success, #view-history, #view-admin { display: none; }
+        .active-view { display: block !important; animation: fadeIn 0.5s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col overflow-x-hidden selection:bg-violet-500/30">
+    <div class="bg-glow"></div>
+
+    <div id="notificationArea" class="fixed top-24 left-1/2 -translate-x-1/2 z-[60] transition-all duration-300 opacity-0 pointer-events-none translate-y-[-20px]">
+        <div class="bg-emerald-500 text-white px-6 py-3 rounded-2xl shadow-lg shadow-emerald-500/20 font-bold flex items-center gap-2">
+            <i data-lucide="check-circle-2" class="w-4 h-4"></i> <span id="notificationText">Berhasil!</span>
+        </div>
+    </div>
+
+    <nav id="navbar" class="fixed top-0 w-full z-50 transition-all duration-300 bg-transparent py-6">
+        <div class="max-w-7xl mx-auto px-6 flex justify-between items-center">
+            <div class="flex items-center gap-3 cursor-pointer group" onclick="app.navigateTo('home')">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center shadow-lg shadow-violet-500/25 group-hover:scale-105 transition-transform duration-300">
+                    <i data-lucide="gamepad-2" class="text-white w-5 h-5"></i>
+                </div>
+                <h1 class="text-2xl font-black tracking-tight text-white flex items-center gap-1">
+                    Joexit <span class="w-2 h-2 rounded-full bg-violet-500 mt-1 animate-pulse"></span>
+                </h1>
+            </div>
+            
+            <div id="navButtons" class="flex items-center gap-2 p-1.5 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-md">
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow pt-36 pb-24 px-6 max-w-7xl mx-auto w-full relative">
+        <div id="view-auth" class="max-w-md mx-auto mt-10">
+            <div class="relative glass-panel rounded-[2rem] p-8 sm:p-10 shadow-2xl overflow-hidden">
+                <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-1 bg-gradient-to-r from-transparent via-violet-500 to-transparent"></div>
+                
+                <div class="w-16 h-16 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-inner">
+                    <i data-lucide="lock" class="text-violet-400 w-7 h-7"></i>
+                </div>
+                
+                <h2 id="authTitle" class="text-3xl font-black text-white mb-2 text-center tracking-tight">Selamat Datang</h2>
+                <p class="text-zinc-400 text-center mb-8 text-sm">
+                    Masuk sebagai admin gunakan email <br/><strong class="text-white bg-white/10 px-2 py-0.5 rounded ml-1">admin@joexit.com</strong>
+                </p>
+
+                <form id="authForm" class="space-y-4">
+                    <div class="space-y-1.5">
+                        <label class="text-sm font-medium text-zinc-300 pl-1">Alamat Email</label>
+                        <input type="email" id="emailInput" required class="w-full bg-black/50 border border-white/10 rounded-2xl px-5 py-4 text-white focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all placeholder:text-zinc-600" placeholder="nama@email.com">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-sm font-medium text-zinc-300 pl-1">Kata Sandi</label>
+                        <input type="password" id="passwordInput" required class="w-full bg-black/50 border border-white/10 rounded-2xl px-5 py-4 text-white focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all placeholder:text-zinc-600" placeholder="••••••••">
+                    </div>
+                    <button type="submit" id="authBtn" class="w-full py-4 rounded-2xl font-bold bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white shadow-lg shadow-violet-500/25 transition-all duration-300 hover:-translate-y-1 mt-6">
+                        Masuk ke Akun
+                    </button>
+                </form>
+
+                <div class="mt-8 text-center text-sm font-medium text-zinc-500">
+                    <span id="authToggleText">Belum bergabung? </span>
+                    <button onclick="app.toggleAuthMode()" id="authToggleBtn" class="text-violet-400 hover:text-violet-300 transition-colors">Buat akun</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-home">
+            <div class="text-center max-w-4xl mx-auto mb-20">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-zinc-300 text-sm font-medium mb-8 backdrop-blur-sm">
+                    <i data-lucide="zap" class="text-amber-400 w-3.5 h-3.5"></i> Platform Key Subscription Terpercaya
+                </div>
+                <h2 class="text-5xl md:text-7xl font-black mb-6 tracking-tight leading-[1.1]">
+                    Tingkatkan Performa <br/>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-fuchsia-400 to-pink-400">Game Anda.</span>
+                </h2>
+                <p class="text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto mb-10 leading-relaxed">
+                    Pilih modul terbaik yang dirancang khusus untuk keamanan tingkat tinggi dan fitur premium tanpa batas.
+                </p>
+                
+                <div id="categoryContainer" class="flex flex-wrap justify-center gap-4"></div>
+            </div>
+            
+            <div id="productGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative"></div>
+        </div>
+
+        <div id="view-detail" class="max-w-5xl mx-auto">
+            <button onclick="app.navigateTo('home')" class="flex items-center gap-2 text-zinc-400 hover:text-white mb-8 transition-colors font-medium">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i> Kembali ke Katalog
+            </button>
+
+            <div class="glass-panel rounded-[2.5rem] p-8 md:p-12 mb-8 relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-64 h-64 bg-violet-500/10 blur-[100px] rounded-full"></div>
+                <div id="productDetailInfo" class="relative z-10"></div>
+            </div>
+
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-2xl font-bold text-white">Pilih Durasi Aktif</h3>
+                <div class="h-px flex-1 bg-gradient-to-r from-white/10 to-transparent ml-6"></div>
+            </div>
+
+            <div id="packageGrid" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
+        </div>
+
+        <div id="view-payment" class="max-w-lg mx-auto mt-4">
+            <button onclick="app.navigateTo('detail')" class="flex items-center gap-2 text-zinc-400 hover:text-white mb-6 font-medium">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i> Batalkan Pesanan
+            </button>
+
+            <div class="glass-panel rounded-[2.5rem] p-8 sm:p-10 shadow-2xl relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-6 opacity-10 pointer-events-none">
+                    <i data-lucide="qr-code" class="w-[150px] h-[150px]"></i>
+                </div>
+
+                <h2 class="text-2xl font-black text-white mb-8">Selesaikan Pembayaran</h2>
+
+                <div class="flex flex-col items-center mb-8 relative z-10">
+                    <div class="bg-white p-4 rounded-3xl shadow-xl shadow-white/5 mb-6 ring-8 ring-white/5">
+                        <i data-lucide="qr-code" class="w-[180px] h-[180px] text-black"></i>
+                    </div>
+                    
+                    <div class="w-full bg-black/40 border border-white/5 rounded-2xl p-6 text-center">
+                        <div class="text-sm font-medium text-zinc-400 mb-2">Total Tagihan + Kode Unik</div>
+                        <div id="paymentTotal" class="text-4xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-fuchsia-400 tracking-tight"></div>
+                        <div class="mt-3 text-xs font-semibold text-amber-400 bg-amber-400/10 inline-block px-3 py-1.5 rounded-lg border border-amber-400/20">
+                            Pastikan nominal transfer sama persis.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="relative z-10">
+                    <label class="flex flex-col items-center justify-center w-full py-8 border-2 border-dashed border-zinc-700 hover:border-violet-500/50 rounded-3xl cursor-pointer bg-black/20 hover:bg-black/40 transition-all duration-300 mb-4 group">
+                        <div class="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                            <i data-lucide="upload" class="w-6 h-6 text-zinc-300"></i>
+                        </div>
+                        <span id="fileNameDisplay" class="text-sm font-medium text-zinc-300">Pilih Foto Bukti Transfer</span>
+                        <input type="file" id="fileInput" accept="image/*" class="hidden" onchange="app.handleFileChange(event)">
+                    </label>
+
+                    <p id="uploadStatusText" class="text-sm font-medium text-amber-400 mb-4 text-center hidden"></p>
+
+                    <button id="submitPaymentBtn" onclick="app.submitPayment()" class="w-full py-4 rounded-2xl font-bold bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white transition-all duration-300 shadow-lg shadow-violet-500/25 flex items-center justify-center h-14">
+                        Kirim Bukti Pembayaran
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-success" class="max-w-md mx-auto text-center mt-20 glass-panel rounded-[3rem] p-12">
+            <div class="w-24 h-24 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner shadow-emerald-500/20">
+                <i data-lucide="check-circle" class="w-12 h-12 text-emerald-400"></i>
+            </div>
+            <h2 class="text-3xl font-black text-white mb-4 tracking-tight">Data Diterima</h2>
+            <p class="text-zinc-400 mb-10 leading-relaxed">Sistem sedang memverifikasi pembayaran Anda. Key otomatis masuk ke riwayat setelah disetujui.</p>
+            <button onclick="app.navigateTo('history')" class="w-full py-4 bg-white text-black rounded-2xl font-bold hover:bg-zinc-200 transition-colors shadow-lg shadow-white/10">
+                Cek Status Pesanan
+            </button>
+        </div>
+
+        <div id="view-history" class="max-w-4xl mx-auto">
+            <div class="flex items-center gap-4 mb-10">
+                <div class="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
+                    <i data-lucide="history" class="text-white w-6 h-6"></i>
+                </div>
+                <div>
+                    <h2 class="text-3xl font-black text-white">Riwayat Transaksi</h2>
+                    <p class="text-zinc-400 font-medium mt-1">Lacak pesanan dan lihat akses Key Anda.</p>
+                </div>
+            </div>
+            <div id="historyContainer"></div>
+        </div>
+
+        <div id="view-admin" class="max-w-5xl mx-auto">
+            <div class="flex items-center gap-4 mb-10">
+                <div class="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
+                    <i data-lucide="settings" class="text-white w-6 h-6"></i>
+                </div>
+                <div>
+                    <h2 class="text-3xl font-black text-white">Pusat Kendali Admin</h2>
+                    <p class="text-zinc-400 font-medium mt-1">Kelola transaksi dan distribusikan akses.</p>
+                </div>
+            </div>
+            <div id="adminContainer"></div>
+        </div>
+    </main>
+
+    <footer class="mt-auto border-t border-white/5 glass-panel pt-16 pb-8 px-6">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+                <div class="md:col-span-2">
+                    <div class="flex items-center gap-2 mb-6">
+                        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center">
+                            <i data-lucide="gamepad-2" class="text-white w-4 h-4"></i>
+                        </div>
+                        <h2 class="text-xl font-black text-white">Joexit</h2>
+                    </div>
+                    <p class="text-zinc-400 text-sm leading-relaxed max-w-sm">
+                        Platform langganan key premium terpercaya. Kami menyediakan alat terbaik untuk meningkatkan pengalaman bermain game Anda dengan keamanan terjamin.
+                    </p>
+                </div>
+                
+                <div>
+                    <h3 class="text-white font-bold mb-6">Tautan Cepat</h3>
+                    <ul class="space-y-4">
+                        <li><button onclick="app.navigateTo('home')" class="text-sm text-zinc-400 hover:text-violet-400 transition-colors">Katalog Produk</button></li>
+                        <li><button onclick="app.navigateTo('auth')" class="text-sm text-zinc-400 hover:text-violet-400 transition-colors">Akun Saya</button></li>
+                        <li><a href="#" class="text-sm text-zinc-400 hover:text-violet-400 transition-colors">Syarat & Ketentuan</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-white font-bold mb-6">Hubungi Kami</h3>
+                    <div class="flex gap-4">
+                        <a href="#" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-zinc-400 hover:bg-violet-600 hover:text-white transition-all duration-300"><i data-lucide="mail" class="w-4 h-4"></i></a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-zinc-400 hover:bg-violet-600 hover:text-white transition-all duration-300"><i data-lucide="instagram" class="w-4 h-4"></i></a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-zinc-400 hover:bg-violet-600 hover:text-white transition-all duration-300"><i data-lucide="twitter" class="w-4 h-4"></i></a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-xs text-zinc-500 font-medium">&copy; <span id="currentYear"></span> Joexit. All rights reserved.</p>
+                <div class="flex items-center gap-2 text-xs font-bold text-zinc-500">
+                    <i data-lucide="shield" class="w-3.5 h-3.5 text-emerald-500"></i> SECURE SYSTEM
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const productsData = [
+            { id: 1, name: 'Fluorite', game: 'Free Fire', os: 'iOS', desc: 'Aimbot presisi tinggi dengan bypass keamanan terbaru.', features: ['Aimbot Akurat', 'ESP Lengkap', 'Anti-Ban Aktif'], packages: [{ id: '1-1', duration: '1 Hari', price: 50000, stock: 20 }, { id: '1-7', duration: '7 Hari', price: 150000, stock: 10 }, { id: '1-30', duration: '30 Hari', price: 350000, stock: 5 }] },
+            { id: 2, name: 'Migul', game: 'Free Fire', os: 'iOS', desc: 'Menu premium yang stabil untuk permainan kompetitif.', features: ['Menu Premium', 'Bypass Cepat', 'Tanpa Lag'], packages: [{ id: '2-1', duration: '1 Hari', price: 40000, stock: 15 }, { id: '2-7', duration: '7 Hari', price: 120000, stock: 8 }] },
+            { id: 3, name: 'Drip Client', game: 'Free Fire', os: 'Android', desc: 'Solusi ringan untuk perangkat Android dengan fitur lengkap.', features: ['Tanpa Recoil', 'Performa Ringan', 'Aman Digunakan'], packages: [{ id: '3-1', duration: '1 Hari', price: 35000, stock: 25 }, { id: '3-7', duration: '7 Hari', price: 100000, stock: 12 }] },
+            { id: 4, name: 'Fluorite', game: 'MLBB', os: 'iOS', desc: 'Dominasi peta dengan radar hack dan drone view.', features: ['Map Hack Radar', 'Drone View', 'Buka Semua Skin'], packages: [{ id: '4-1', duration: '1 Hari', price: 60000, stock: 15 }, { id: '4-7', duration: '7 Hari', price: 180000, stock: 7 }] },
+            { id: 5, name: 'Fluorite', game: '8 Ball Pool', os: 'iOS', desc: 'Tingkatkan akurasi tembakan dengan garis bantu.', features: ['Garis Bantu Panjang', 'Main Otomatis', 'Anti Deteksi'], packages: [{ id: '5-1', duration: '1 Hari', price: 30000, stock: 25 }, { id: '5-7', duration: '7 Hari', price: 90000, stock: 15 }] }
+        ];
+
+        const app = {
+            view: 'home',
+            activeCategory: 'Semua',
+            selectedProductId: null,
+            dailyOrderCount: 1,
+            checkoutInfo: null,
+            paymentFile: null,
+            isUploading: false,
+            user: null,
+            authMode: 'login',
+            allOrders: [],
+            newlyApprovedId: null,
+
+            init() {
+                lucide.createIcons();
+                document.getElementById('currentYear').textContent = new Date().getFullYear();
+                window.addEventListener('scroll', () => {
+                    const nav = document.getElementById('navbar');
+                    if (window.scrollY > 20) {
+                        nav.classList.add('bg-[#0a0a0c]/80', 'backdrop-blur-xl', 'border-b', 'border-white/5', 'shadow-2xl', 'shadow-black');
+                        nav.classList.remove('bg-transparent', 'py-6');
+                        nav.classList.add('py-4');
+                    } else {
+                        nav.classList.remove('bg-[#0a0a0c]/80', 'backdrop-blur-xl', 'border-b', 'border-white/5', 'shadow-2xl', 'shadow-black', 'py-4');
+                        nav.classList.add('bg-transparent', 'py-6');
+                    }
+                });
+
+                document.getElementById('authForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const email = document.getElementById('emailInput').value;
+                    const pass = document.getElementById('passwordInput').value;
+                    if(email && pass) {
+                        this.user = { email: email, isAdmin: email === 'admin@joexit.com' };
+                        this.navigateTo('home');
+                        document.getElementById('emailInput').value = '';
+                        document.getElementById('passwordInput').value = '';
+                    }
+                });
+
+                this.render();
+            },
+
+            formatPrice(price) {
+                return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(price);
+            },
+
+            generateOrderId() {
+                return 'JX' + Math.random().toString(36).substr(2, 6).toUpperCase();
+            },
+
+            showNotification(message) {
+                const notif = document.getElementById('notificationArea');
+                document.getElementById('notificationText').textContent = message;
+                notif.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-[-20px]');
+                setTimeout(() => {
+                    notif.classList.add('opacity-0', 'pointer-events-none', 'translate-y-[-20px]');
+                }, 5000);
+            },
+
+            triggerConfetti() {
+                const duration = 3000;
+                const end = Date.now() + duration;
+                const frame = () => {
+                    confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#8b5cf6', '#d946ef', '#10b981'] });
+                    confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#8b5cf6', '#d946ef', '#10b981'] });
+                    if (Date.now() < end) requestAnimationFrame(frame);
+                };
+                frame();
+            },
+
+            navigateTo(newView) {
+                document.querySelectorAll('main > div').forEach(el => el.classList.remove('active-view'));
+                document.getElementById(`view-${newView}`).classList.add('active-view');
+                this.view = newView;
+                this.selectedProductId = null;
+                this.paymentFile = null;
+                document.getElementById('uploadStatusText').classList.add('hidden');
+                document.getElementById('fileNameDisplay').textContent = 'Pilih Foto Bukti Transfer';
+                window.scrollTo(0, 0);
+
+                if (newView === 'history' && this.newlyApprovedId) {
+                    this.triggerConfetti();
+                    this.showNotification("Pesanan Anda telah disetujui! Key siap digunakan.");
+                    this.newlyApprovedId = null;
+                }
+                this.render();
+            },
+
+            toggleAuthMode() {
+                this.authMode = this.authMode === 'login' ? 'register' : 'login';
+                document.getElementById('authTitle').textContent = this.authMode === 'login' ? 'Selamat Datang' : 'Buat Akun';
+                document.getElementById('authBtn').textContent = this.authMode === 'login' ? 'Masuk ke Akun' : 'Daftar Sekarang';
+                document.getElementById('authToggleText').textContent = this.authMode === 'login' ? 'Belum bergabung? ' : 'Sudah memiliki akun? ';
+                document.getElementById('authToggleBtn').textContent = this.authMode === 'login' ? 'Buat akun' : 'Masuk';
+            },
+
+            logout() {
+                this.user = null;
+                this.navigateTo('home');
+            },
+
+            setCategory(cat) {
+                this.activeCategory = cat;
+                this.renderHome();
+            },
+
+            showDetail(id) {
+                this.selectedProductId = id;
+                this.navigateTo('detail');
+            },
+
+            processCheckout(productId, packageId) {
+                if (!this.user) {
+                    this.navigateTo('auth');
+                    return;
+                }
+                const product = productsData.find(p => p.id === productId);
+                const pkg = product.packages.find(p => p.id === packageId);
+                const uniquePrice = pkg.price + this.dailyOrderCount;
+                const orderId = this.generateOrderId();
+                this.checkoutInfo = { product, pkg, uniquePrice, orderId };
+                this.dailyOrderCount++;
+                this.navigateTo('payment');
+            },
+
+            handleFileChange(event) {
+                if (event.target.files && event.target.files[0]) {
+                    this.paymentFile = event.target.files[0];
+                    document.getElementById('fileNameDisplay').textContent = this.paymentFile.name;
+                }
+            },
+
+            submitPayment() {
+                if (!this.paymentFile) {
+                    const statusText = document.getElementById('uploadStatusText');
+                    statusText.textContent = 'Silakan unggah foto bukti transfer Anda.';
+                    statusText.classList.remove('hidden');
+                    return;
+                }
+
+                this.isUploading = true;
+                const btn = document.getElementById('submitPaymentBtn');
+                btn.innerHTML = '<div class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>';
+                btn.disabled = true;
+
+                setTimeout(() => {
+                    const newOrder = {
+                        id: this.checkoutInfo.orderId,
+                        userEmail: this.user.email,
+                        productName: this.checkoutInfo.product.name,
+                        game: this.checkoutInfo.product.game,
+                        duration: this.checkoutInfo.pkg.duration,
+                        price: this.checkoutInfo.uniquePrice,
+                        status: 'Diproses',
+                        keyData: null,
+                        date: new Date().toLocaleDateString('id-ID')
+                    };
+                    
+                    this.allOrders.unshift(newOrder);
+                    this.isUploading = false;
+                    btn.innerHTML = 'Kirim Bukti Pembayaran';
+                    btn.disabled = false;
+                    this.navigateTo('success');
+                }, 2000);
+            },
+
+            confirmOrder(orderId) {
+                const inputEl = document.getElementById(`adminKey-${orderId}`);
+                const key = inputEl ? inputEl.value : null;
+                if (!key) return;
+
+                this.allOrders = this.allOrders.map(order => 
+                    order.id === orderId ? { ...order, status: 'Selesai', keyData: key } : order
+                );
+                
+                this.newlyApprovedId = orderId;
+                if (this.user && this.user.isAdmin) {
+                    this.showNotification(`Key pesanan ${orderId} terkirim.`);
+                }
+                this.renderAdmin();
+            },
+
+            getOsIconHTML(os) {
+                return os === 'iOS' ? '<i data-lucide="apple" class="text-zinc-200 w-4 h-4"></i>' : '<i data-lucide="smartphone" class="text-zinc-200 w-4 h-4"></i>';
+            },
+
+            renderNav() {
+                const container = document.getElementById('navButtons');
+                let html = `<button onclick="app.navigateTo('home')" class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-300 ${this.view === 'home' || this.view === 'detail' ? 'bg-white/10 text-white shadow-sm' : 'text-zinc-400 hover:text-white hover:bg-white/5'}"><i data-lucide="home" class="w-4 h-4"></i> <span class="hidden sm:inline">Katalog</span></button>`;
+                
+                if (this.user) {
+                    if (this.user.isAdmin) {
+                        html += `<button onclick="app.navigateTo('admin')" class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-300 ${this.view === 'admin' ? 'bg-white/10 text-white' : 'text-zinc-400 hover:text-white hover:bg-white/5'}"><i data-lucide="settings" class="w-4 h-4"></i> <span class="hidden sm:inline">Panel</span></button>`;
+                    } else {
+                        html += `<button onclick="app.navigateTo('history')" class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-300 ${this.view === 'history' ? 'bg-white/10 text-white' : 'text-zinc-400 hover:text-white hover:bg-white/5'}"><i data-lucide="history" class="w-4 h-4"></i> <span class="hidden sm:inline">Riwayat</span></button>`;
+                    }
+                    html += `<div class="w-px h-6 bg-white/10 mx-1"></div><button onclick="app.logout()" class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-all duration-300"><i data-lucide="log-out" class="w-4 h-4"></i></button>`;
+                } else {
+                    html += `<button onclick="app.navigateTo('auth')" class="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-bold bg-white text-black hover:bg-zinc-200 transition-all duration-300 shadow-lg shadow-white/10 hover:scale-105"><i data-lucide="user" class="w-4 h-4"></i> Masuk</button>`;
+                }
+                container.innerHTML = html;
+                lucide.createIcons();
+            },
+
+            renderHome() {
+                const cats = ['Semua', 'Free Fire', 'MLBB', '8 Ball Pool'];
+                let catHtml = '';
+                cats.forEach(c => {
+                    const activeClass = this.activeCategory === c ? 'bg-white text-black shadow-lg shadow-white/10 scale-105' : 'bg-white/5 text-zinc-400 border border-white/10 hover:bg-white/10 hover:text-white';
+                    catHtml += `<button onclick="app.setCategory('${c}')" class="px-6 py-3 rounded-2xl text-sm font-bold transition-all duration-300 ${activeClass}">${c}</button>`;
+                });
+                document.getElementById('categoryContainer').innerHTML = catHtml;
+
+                const filtered = this.activeCategory === 'Semua' ? productsData : productsData.filter(p => p.game === this.activeCategory);
+                let gridHtml = '';
+                filtered.forEach(p => {
+                    let featHtml = '';
+                    p.features.forEach(f => {
+                        featHtml += `<div class="flex items-center gap-3"><div class="w-5 h-5 rounded-full bg-violet-500/10 flex items-center justify-center shrink-0"><i data-lucide="check" class="text-violet-400 w-3 h-3"></i></div><span class="text-zinc-300 text-sm font-medium">${f}</span></div>`;
+                    });
+
+                    gridHtml += `
+                        <div onclick="app.showDetail(${p.id})" class="group relative bg-zinc-900/40 backdrop-blur-xl rounded-[2rem] p-1 border border-white/10 cursor-pointer transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-violet-500/20 overflow-hidden">
+                            <div class="absolute inset-0 bg-gradient-to-br from-violet-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                            <div class="bg-[#0a0a0c]/80 rounded-[1.8rem] p-6 h-full flex flex-col relative z-10">
+                                <div class="flex justify-between items-start mb-6">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">${this.getOsIconHTML(p.os)}</div>
+                                        <div>
+                                            <h3 class="text-xl font-bold text-white group-hover:text-violet-400 transition-colors">${p.name}</h3>
+                                            <span class="text-xs font-semibold text-zinc-500 uppercase tracking-wider">${p.game}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="text-zinc-400 text-sm mb-6 leading-relaxed line-clamp-2">${p.desc}</p>
+                                <div class="space-y-3 mb-8 flex-grow">${featHtml}</div>
+                                <div class="pt-6 border-t border-white/5 mt-auto">
+                                    <div class="flex items-center justify-between text-zinc-400 text-sm font-medium group-hover:text-white transition-colors">
+                                        Lihat Pilihan Paket
+                                        <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-violet-600 group-hover:text-white transition-all duration-300"><i data-lucide="chevron-right" class="w-4 h-4"></i></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
+                });
+                document.getElementById('productGrid').innerHTML = gridHtml;
+                lucide.createIcons();
+            },
+
+            renderDetail() {
+                if(!this.selectedProductId) return;
+                const p = productsData.find(x => x.id === this.selectedProductId);
+                let featHtml = '';
+                p.features.forEach(f => {
+                    featHtml += `<div class="flex items-center gap-3 bg-black/30 px-4 py-3 rounded-2xl border border-white/5"><i data-lucide="shield" class="text-emerald-400 w-[18px] h-[18px]"></i><span class="text-zinc-200 font-medium">${f}</span></div>`;
+                });
+
+                document.getElementById('productDetailInfo').innerHTML = `
+                    <div class="flex flex-col md:flex-row gap-8 items-start justify-between">
+                        <div>
+                            <div class="flex items-center gap-3 mb-4">
+                                <span class="px-3 py-1 bg-white/10 rounded-lg text-sm font-bold text-white border border-white/10">${p.game}</span>
+                                <span class="px-3 py-1 bg-white/5 rounded-lg text-sm font-bold text-zinc-300 border border-white/5 flex items-center gap-1.5">${this.getOsIconHTML(p.os)} ${p.os}</span>
+                            </div>
+                            <h2 class="text-4xl md:text-5xl font-black text-white mb-4 tracking-tight">${p.name}</h2>
+                            <p class="text-zinc-400 text-lg max-w-xl leading-relaxed mb-8">${p.desc}</p>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">${featHtml}</div>
+                        </div>
+                    </div>`;
+
+                let pkgHtml = '';
+                p.packages.forEach(pkg => {
+                    const stockHtml = pkg.stock > 5 ? `<span class="text-emerald-400 font-bold bg-emerald-400/10 px-2 py-1 rounded-md">${pkg.stock} Unit</span>` : (pkg.stock > 0 ? `<span class="text-amber-400 font-bold bg-amber-400/10 px-2 py-1 rounded-md">Sisa ${pkg.stock}</span>` : `<span class="text-rose-400 font-bold bg-rose-400/10 px-2 py-1 rounded-md">Habis</span>`);
+                    const btnClass = pkg.stock > 0 ? 'bg-white text-black hover:bg-zinc-200 hover:scale-[1.02] shadow-lg shadow-white/10' : 'bg-white/5 text-zinc-600 cursor-not-allowed border border-white/5';
+                    pkgHtml += `
+                        <div class="relative bg-zinc-900/30 backdrop-blur-lg border border-white/10 rounded-[2rem] p-6 sm:p-8 flex flex-col transition-all duration-300 hover:border-violet-500/50 hover:bg-zinc-900/80 group">
+                            <div class="text-center mb-8">
+                                <div class="text-violet-400 font-black text-2xl mb-2">${pkg.duration}</div>
+                                <div class="text-4xl font-black text-white tracking-tight">${this.formatPrice(pkg.price)}</div>
+                            </div>
+                            <div class="mt-auto pt-6 border-t border-white/5">
+                                <div class="flex justify-between items-center mb-6 text-sm"><span class="text-zinc-500 font-medium">Ketersediaan</span>${stockHtml}</div>
+                                <button onclick="app.processCheckout(${p.id}, '${pkg.id}')" ${pkg.stock === 0 ? 'disabled' : ''} class="w-full py-4 rounded-2xl font-bold flex justify-center items-center gap-2 transition-all duration-300 ${btnClass}">${pkg.stock > 0 ? 'Beli Sekarang' : 'Stok Kosong'}</button>
+                            </div>
+                        </div>`;
+                });
+                document.getElementById('packageGrid').innerHTML = pkgHtml;
+                lucide.createIcons();
+            },
+
+            renderPayment() {
+                if(this.checkoutInfo) {
+                    document.getElementById('paymentTotal').textContent = `Rp ${this.checkoutInfo.uniquePrice.toLocaleString('id-ID')}`;
+                }
+            },
+
+            renderHistory() {
+                const uOrders = this.allOrders.filter(o => o.userEmail === this.user?.email);
+                const container = document.getElementById('historyContainer');
+                
+                if (uOrders.length === 0) {
+                    container.innerHTML = `
+                        <div class="bg-zinc-900/30 border border-white/5 rounded-[2rem] py-20 px-6 text-center border-dashed">
+                            <i data-lucide="shopping-cart" class="w-12 h-12 text-zinc-700 mx-auto mb-4"></i>
+                            <p class="text-zinc-500 font-medium">Anda belum melakukan transaksi apapun.</p>
+                        </div>`;
+                } else {
+                    let html = '<div class="grid gap-6">';
+                    uOrders.forEach(o => {
+                        const isNew = o.id === this.newlyApprovedId;
+                        const borderClass = isNew ? 'neon-border scale-[1.02]' : 'border-white/10 hover:border-white/20';
+                        const statusClass = o.status === 'Diproses' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+                        const newBadge = isNew ? `<span class="ml-2 bg-violet-500 text-white px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest animate-pulse">Baru</span>` : '';
+                        
+                        let keyHtml = '';
+                        if(o.status === 'Selesai' && o.keyData) {
+                            keyHtml = `
+                                <div class="mt-6 pt-6 border-t border-white/5">
+                                    <div class="text-sm font-semibold text-zinc-400 mb-3 flex items-center justify-between">
+                                        <span class="flex items-center gap-2"><i data-lucide="key" class="w-4 h-4 text-emerald-400"></i> Akses Key Anda</span>
+                                        <span class="flex items-center gap-1 text-[10px] text-rose-400 bg-rose-500/10 px-2 py-1 rounded border border-rose-500/20"><i data-lucide="eye-off" class="w-2.5 h-2.5"></i> Anti-Screenshot</span>
+                                    </div>
+                                    <div class="relative group cursor-copy">
+                                        <code class="block w-full bg-black/60 border border-emerald-500/20 p-4 rounded-xl text-emerald-400 font-mono text-sm sm:text-base break-all select-all font-bold secure-key">${o.keyData}</code>
+                                        <div class="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-black/80 px-2 py-1 rounded text-xs text-white pointer-events-none">Blok untuk menyalin</div>
+                                    </div>
+                                </div>`;
+                        }
+
+                        html += `
+                            <div class="bg-zinc-900/50 backdrop-blur-md rounded-[2rem] p-6 sm:p-8 border transition-all duration-500 ${borderClass}">
+                                <div class="flex flex-col sm:flex-row justify-between items-start gap-4 mb-6">
+                                    <div>
+                                        <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-black/50 border border-white/5 text-xs font-mono text-zinc-400 mb-3">ID: ${o.id} ${newBadge}</div>
+                                        <h3 class="text-xl sm:text-2xl font-black text-white">${o.productName}</h3>
+                                        <div class="text-sm font-medium text-zinc-400 mt-1">${o.game} <span class="mx-2">•</span> ${o.duration}</div>
+                                    </div>
+                                    <div class="sm:text-right w-full sm:w-auto flex flex-row sm:flex-col justify-between sm:justify-start items-center sm:items-end">
+                                        <span class="px-3 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider border ${statusClass}">${o.status}</span>
+                                        <div class="text-lg font-bold text-white mt-0 sm:mt-3">Rp ${o.price.toLocaleString('id-ID')}</div>
+                                    </div>
+                                </div>
+                                ${keyHtml}
+                            </div>`;
+                    });
+                    html += '</div>';
+                    container.innerHTML = html;
+                }
+                lucide.createIcons();
+            },
+
+            renderAdmin() {
+                const container = document.getElementById('adminContainer');
+                if (this.allOrders.length === 0) {
+                    container.innerHTML = `<div class="bg-zinc-900/30 border border-white/5 rounded-[2rem] py-20 px-6 text-center border-dashed"><p class="text-zinc-500 font-medium">Antrean pesanan kosong.</p></div>`;
+                } else {
+                    let html = '<div class="grid gap-6">';
+                    this.allOrders.forEach(o => {
+                        const statusClass = o.status === 'Diproses' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+                        
+                        let actionHtml = '';
+                        if (o.status === 'Diproses') {
+                            actionHtml = `
+                                <div class="flex flex-col sm:flex-row gap-3 mt-6 pt-6 border-t border-white/5">
+                                    <input type="text" id="adminKey-${o.id}" placeholder="Ketik Key yang akan dikirim..." class="flex-1 bg-black/50 border border-white/10 rounded-xl px-5 py-3 text-white focus:outline-none focus:border-violet-500 font-mono text-sm">
+                                    <button onclick="app.confirmOrder('${o.id}')" class="px-6 py-3 bg-white hover:bg-zinc-200 text-black rounded-xl font-bold transition-colors flex items-center justify-center gap-2">Kirim Key</button>
+                                </div>`;
+                        } else if (o.status === 'Selesai') {
+                            actionHtml = `
+                                <div class="mt-4 pt-4 border-t border-white/5 text-sm font-medium text-emerald-400 flex items-center gap-2">
+                                    <i data-lucide="check-circle-2" class="w-4 h-4"></i> Disetujui. Key: <span class="font-mono text-white">${o.keyData}</span>
+                                </div>`;
+                        }
+
+                        html += `
+                            <div class="bg-zinc-900/50 backdrop-blur-md rounded-[2rem] p-6 sm:p-8 border border-white/10">
+                                <div class="flex flex-col md:flex-row justify-between items-start gap-4 mb-6">
+                                    <div>
+                                        <div class="flex items-center gap-3 mb-2">
+                                            <span class="text-xs font-mono bg-black/50 px-2 py-1 rounded-lg text-zinc-400 border border-white/5">${o.id}</span>
+                                            <span class="text-xs font-bold text-violet-400 bg-violet-500/10 px-2 py-1 rounded-lg">${o.userEmail}</span>
+                                        </div>
+                                        <h3 class="text-xl font-bold text-white">${o.productName} <span class="text-zinc-500 font-medium">(${o.duration})</span></h3>
+                                    </div>
+                                    <div class="md:text-right flex flex-row md:flex-col justify-between items-center md:items-end w-full md:w-auto">
+                                        <div class="text-xl font-black text-white">Rp ${o.price.toLocaleString('id-ID')}</div>
+                                        <span class="mt-2 px-3 py-1 rounded-lg text-xs font-bold border ${statusClass}">${o.status}</span>
+                                    </div>
+                                </div>
+                                ${actionHtml}
+                            </div>`;
+                    });
+                    html += '</div>';
+                    container.innerHTML = html;
+                }
+                lucide.createIcons();
+            },
+
+            render() {
+                this.renderNav();
+                if(this.view === 'home') this.renderHome();
+                if(this.view === 'detail') this.renderDetail();
+                if(this.view === 'payment') this.renderPayment();
+                if(this.view === 'history') this.renderHistory();
+                if(this.view === 'admin') this.renderAdmin();
+            }
+        };
+
+        window.onload = () => app.init();
+    </script>
+</body>
+</html>
